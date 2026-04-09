@@ -12,7 +12,9 @@
         #urlInput { flex-grow: 1; padding: 10px 20px; border-radius: 20px; border: 1px solid #dfe1e5; outline: none; font-size: 14px; }
         
         #view-container { flex-grow: 1; background: white; position: relative; }
-        iframe { width: 100%; height: 100%; border: none; background: white; }
+        
+        /* Webview must be styled to fill the container */
+        webview { width: 100%; height: 100%; background: white; }
 
         /* Welcome Overlay */
         #home-screen {
@@ -30,22 +32,22 @@
 
     <div class="toolbar">
         <button class="nav-btn" onclick="goHome()">🏠</button>
-        <button class="nav-btn" onclick="document.getElementById('viewport').contentWindow.history.back()">←</button>
-        <input type="text" id="urlInput" placeholder="Search Google-style or type a URL" onkeydown="if(event.key==='Enter') doSearch()">
+        <button class="nav-btn" onclick="back()">←</button>
+        <input type="text" id="urlInput" placeholder="Search or type URL (e.g. youtube.com)" onkeydown="if(event.key==='Enter') doSearch()">
         <button class="nav-btn" style="background: #4285f4; color: white; border-radius: 20px;" onclick="doSearch()">Search</button>
     </div>
 
     <div id="view-container">
         <div id="home-screen">
             <div class="logo"><span>D</span><span>i</span><span>h</span><span>t</span><span>e</span><span>x</span></div>
-            <p style="color: #70757a;">The only browser that doesn't use new tabs.</p>
+            <p style="color: #70757a;">Unblocked. No new tabs. Just Dihtex.</p>
         </div>
 
-        <iframe id="viewport" name="viewport"></iframe>
+        <webview id="viewport" src="about:blank"></webview>
     </div>
 
     <script>
-        const frame = document.getElementById('viewport');
+        const view = document.getElementById('viewport');
         const home = document.getElementById('home-screen');
         const addrBar = document.getElementById('urlInput');
 
@@ -55,26 +57,29 @@
 
             home.style.display = 'none';
             
-            // Logic: Is it a URL?
+            let targetUrl = "";
             if (val.includes('.') && !val.includes(' ')) {
-                let url = val.startsWith('http') ? val : 'https://' + val;
-                frame.src = url;
+                targetUrl = val.startsWith('http') ? val : 'https://' + val;
             } else {
-                // GOOGLE SEARCH WITHOUT REDIRECTS:
-                // We use a public Whoogle instance. It looks like Google,
-                // gives Google results, but stays inside the iframe!
-                frame.src = "https://search.garudalinux.org/search?q=" + encodeURIComponent(val);
+                // Using standard Google search because the Electron main.js will now unblock it
+                targetUrl = "https://www.google.com/search?q=" + encodeURIComponent(val);
+            }
+            
+            // Webview uses .loadURL() or .src
+            view.src = targetUrl;
+        }
+
+        function back() {
+            if (view.canGoBack()) {
+                view.goBack();
             }
         }
 
         function goHome() {
             home.style.display = 'flex';
-            frame.src = 'about:blank';
+            view.src = 'about:blank';
             addrBar.value = '';
         }
-
-        // To make "time in..." work instantly, we use the search results 
-        // which now load perfectly in the window.
     </script>
 </body>
 </html>
