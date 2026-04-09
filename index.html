@@ -2,84 +2,113 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Dihtex | Chromium Pro</title>
+    <title>Dihtex Smart Browser</title>
     <style>
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; height: 100vh; background: #f1f3f4; overflow: hidden; }
-        .toolbar { background: white; padding: 8px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #ccc; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        #urlInput { flex-grow: 1; padding: 10px 20px; border-radius: 20px; border: 1px solid #dfe1e5; outline: none; font-size: 14px; }
-        .nav-btn { cursor: pointer; border: none; background: #eee; padding: 8px 15px; border-radius: 5px; font-weight: bold; color: #5f6368; }
-        .nav-btn:hover { background: #e0e0e0; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f1f3f4; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        #view-container { flex-grow: 1; position: relative; background: #fff; }
-        iframe { width: 100%; height: 100%; border: none; }
-        
-        /* The Welcome Screen */
-        #welcome { 
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-            background: white; display: flex; flex-direction: column; 
-            align-items: center; justify-content: center; z-index: 10; 
+        /* Navigation UI */
+        .toolbar { background: white; padding: 10px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #ccc; z-index: 100; }
+        #urlInput { flex-grow: 1; padding: 10px 20px; border-radius: 20px; border: 1px solid #dfe1e5; outline: none; }
+        .btn { cursor: pointer; border: none; background: #4285f4; color: white; padding: 10px 20px; border-radius: 20px; font-weight: bold; }
+
+        /* Results Area */
+        #browser-frame { flex-grow: 1; position: relative; background: white; }
+        iframe { width: 100%; height: 100%; border: none; display: none; }
+
+        /* Smart Cards (The "Answer" Box) */
+        #smart-card { 
+            position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
+            width: 90%; max-width: 500px; background: white; border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); padding: 20px; display: none; text-align: center;
         }
-        .logo { font-size: 70px; font-weight: bold; margin-bottom: 20px; }
-        .logo span:nth-child(odd) { color: #4285f4; }
-        .logo span:nth-child(even) { color: #ea4335; }
+        .time-val { font-size: 48px; font-weight: bold; color: #202124; margin: 10px 0; }
+        .location-name { color: #5f6368; text-transform: capitalize; }
     </style>
 </head>
 <body>
 
     <div class="toolbar">
-        <button class="nav-btn" onclick="home()">Home</button>
-        <input type="text" id="urlInput" placeholder="Search or type URL (e.g. wikipedia.org)" onkeydown="if(event.key==='Enter') browse()">
-        <button class="nav-btn" onclick="browse()" style="background: #4285f4; color: white;">Go</button>
+        <button class="btn" style="background:#eee; color:#333" onclick="location.reload()">Home</button>
+        <input type="text" id="urlInput" placeholder="Try: 'time in Tokyo' or 'wikipedia.org'" onkeydown="if(event.key==='Enter') processInput()">
+        <button class="btn" onclick="processInput()">Search</button>
     </div>
 
-    <div id="view-container">
-        <div id="welcome">
-            <div class="logo">Dihtex</div>
-            <p>Type a site like <b>wikipedia.org</b> or <b>example.com</b> above.</p>
-            <p style="font-size: 12px; color: #888;">Note: High-security sites (Google/YouTube) will open in a new tab.</p>
+    <div id="browser-frame">
+        <div id="smart-card">
+            <div id="card-content"></div>
+            <button class="btn" style="margin-top:15px; background:#f1f3f4; color: #555;" onclick="hideCard()">Close</button>
         </div>
+        
         <iframe id="viewport"></iframe>
     </div>
 
     <script>
-        const frame = document.getElementById('viewport');
         const input = document.getElementById('urlInput');
-        const welcome = document.getElementById('welcome');
+        const viewport = document.getElementById('viewport');
+        const card = document.getElementById('smart-card');
+        const cardContent = document.getElementById('card-content');
 
-        function browse() {
-            let val = input.value.trim();
-            if(!val) return;
+        async function processInput() {
+            let query = input.value.trim().toLowerCase();
+            if (!query) return;
 
-            let url = val;
-            if(!val.startsWith('http')) {
-                if(val.includes('.') && !val.includes(' ')) {
-                    url = 'https://' + val;
-                } else {
-                    // Using a Search Engine that is currently iframe-friendly
-                    url = 'https://www.ecosia.org/search?q=' + encodeURIComponent(val);
-                }
+            // 1. CHECK FOR TIME QUERY (e.g., "time in London")
+            if (query.includes('time in') || query.includes('time for')) {
+                let city = query.replace('time in', '').replace('time for', '').trim();
+                return showTime(city);
             }
 
-            // LIST OF SITES THAT WILL FAIL IN IFRAMES
-            const restricted = ['google', 'youtube', 'facebook', 'github', 'twitter', 'x.com', 'duckduckgo'];
-            const needsExternal = restricted.some(s => url.toLowerCase().includes(s));
+            // 2. CHECK IF IT'S A DIRECT URL
+            if (query.includes('.') && !query.includes(' ')) {
+                let url = query.startsWith('http') ? query : 'https://' + query;
+                hideCard();
+                viewport.src = url;
+                viewport.style.display = 'block';
+                return;
+            }
 
-            if(needsExternal) {
-                if(confirm("This site (Google/YT/GitHub) blocks being inside Dihtex. Open in a real new tab?")) {
-                    window.open(url, '_blank');
-                }
-            } else {
-                welcome.style.display = 'none';
-                // We use a CORS Proxy for general websites to help them load
-                // Remove the proxy if you only want to visit "friendly" sites
-                frame.src = url; 
+            // 3. FALLBACK TO SEARCH
+            hideCard();
+            viewport.style.display = 'block';
+            viewport.src = "https://www.bing.com/search?q=" + encodeURIComponent(query);
+        }
+
+        function showTime(location) {
+            try {
+                // Map common city names to IANA timezones (Basic mapping)
+                const zones = {
+                    'tokyo': 'Asia/Tokyo', 'london': 'Europe/London', 'new york': 'America/New_York',
+                    'paris': 'Europe/Paris', 'dubai': 'Asia/Dubai', 'israel': 'Asia/Jerusalem',
+                    'india': 'Asia/Kolkata', 'australia': 'Australia/Sydney'
+                };
+
+                let timezone = zones[location] || null;
+                
+                const options = {
+                    timeStyle: 'short',
+                    hour12: true,
+                    timeZone: timezone
+                };
+
+                const formatter = new Intl.DateTimeFormat('en-US', options);
+                const timeString = formatter.format(new Date());
+
+                cardContent.innerHTML = `
+                    <div class="location-name">Current time in ${location}</div>
+                    <div class="time-val">${timeString}</div>
+                    <div style="color:#34a853">Dihtex Smart Answer</div>
+                `;
+                card.style.display = 'block';
+                viewport.style.display = 'none';
+            } catch (e) {
+                // If city not found, just search it
+                viewport.src = "https://www.bing.com/search?q=time+in+" + encodeURIComponent(location);
+                viewport.style.display = 'block';
             }
         }
 
-        function home() {
-            welcome.style.display = 'flex';
-            frame.src = 'about:blank';
-            input.value = '';
+        function hideCard() {
+            card.style.display = 'none';
         }
     </script>
 </body>
