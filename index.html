@@ -2,113 +2,105 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Dihtex Smart Browser</title>
+    <title>Dihtex - The Unblocked Browser</title>
     <style>
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f1f3f4; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; height: 100vh; display: flex; flex-direction: column; background: #f1f3f4; }
         
-        /* Navigation UI */
-        .toolbar { background: white; padding: 10px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #ccc; z-index: 100; }
-        #urlInput { flex-grow: 1; padding: 10px 20px; border-radius: 20px; border: 1px solid #dfe1e5; outline: none; }
+        /* Chromium Style UI */
+        .toolbar { background: white; padding: 10px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #ccc; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        #urlInput { flex-grow: 1; padding: 10px 20px; border-radius: 20px; border: 1px solid #dfe1e5; outline: none; font-size: 14px; }
         .btn { cursor: pointer; border: none; background: #4285f4; color: white; padding: 10px 20px; border-radius: 20px; font-weight: bold; }
 
-        /* Results Area */
-        #browser-frame { flex-grow: 1; position: relative; background: white; }
-        iframe { width: 100%; height: 100%; border: none; display: none; }
+        #view-container { flex-grow: 1; position: relative; background: white; }
+        iframe { width: 100%; height: 100%; border: none; }
 
-        /* Smart Cards (The "Answer" Box) */
+        /* Smart Info Card */
         #smart-card { 
-            position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
-            width: 90%; max-width: 500px; background: white; border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1); padding: 20px; display: none; text-align: center;
+            position: absolute; top: 30px; left: 50%; transform: translateX(-50%);
+            width: 85%; max-width: 450px; background: white; border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15); padding: 25px; display: none; text-align: center; z-index: 10;
         }
-        .time-val { font-size: 48px; font-weight: bold; color: #202124; margin: 10px 0; }
-        .location-name { color: #5f6368; text-transform: capitalize; }
+        .ans-header { font-size: 14px; color: #5f6368; margin-bottom: 5px; }
+        .ans-main { font-size: 40px; font-weight: bold; color: #202124; }
     </style>
 </head>
 <body>
 
     <div class="toolbar">
-        <button class="btn" style="background:#eee; color:#333" onclick="location.reload()">Home</button>
-        <input type="text" id="urlInput" placeholder="Try: 'time in Tokyo' or 'wikipedia.org'" onkeydown="if(event.key==='Enter') processInput()">
-        <button class="btn" onclick="processInput()">Search</button>
+        <button class="btn" style="background:#eee; color:#333" onclick="goHome()">Home</button>
+        <input type="text" id="urlInput" placeholder="Ask anything or type a site..." onkeydown="if(event.key==='Enter') executeSearch()">
+        <button class="btn" onclick="executeSearch()">Search</button>
     </div>
 
-    <div id="browser-frame">
-        <div id="smart-card">
+    <div id="view-container">
+        <iframe id="viewport" src="about:blank"></iframe>
+
+        <div id="smart-card" onclick="this.style.display='none'">
             <div id="card-content"></div>
-            <button class="btn" style="margin-top:15px; background:#f1f3f4; color: #555;" onclick="hideCard()">Close</button>
+            <p style="font-size: 11px; color: #aaa; margin-top: 15px;">Click card to dismiss</p>
         </div>
-        
-        <iframe id="viewport"></iframe>
     </div>
 
     <script>
-        const input = document.getElementById('urlInput');
         const viewport = document.getElementById('viewport');
+        const urlInput = document.getElementById('urlInput');
         const card = document.getElementById('smart-card');
-        const cardContent = document.getElementById('card-content');
 
-        async function processInput() {
-            let query = input.value.trim().toLowerCase();
+        function executeSearch() {
+            const query = urlInput.value.trim();
             if (!query) return;
 
-            // 1. CHECK FOR TIME QUERY (e.g., "time in London")
-            if (query.includes('time in') || query.includes('time for')) {
-                let city = query.replace('time in', '').replace('time for', '').trim();
-                return showTime(city);
-            }
-
-            // 2. CHECK IF IT'S A DIRECT URL
-            if (query.includes('.') && !query.includes(' ')) {
-                let url = query.startsWith('http') ? query : 'https://' + query;
-                hideCard();
-                viewport.src = url;
-                viewport.style.display = 'block';
+            // 1. SMART ANSWER: Is it a time question?
+            if (query.toLowerCase().includes('time in')) {
+                const city = query.toLowerCase().split('time in')[1].trim();
+                showSmartTime(city);
                 return;
             }
 
-            // 3. FALLBACK TO SEARCH
-            hideCard();
-            viewport.style.display = 'block';
-            viewport.src = "https://www.bing.com/search?q=" + encodeURIComponent(query);
+            // 2. DIRECT SITE: Is it a URL?
+            if (query.includes('.') && !query.includes(' ')) {
+                const url = query.startsWith('http') ? query : 'https://' + query;
+                // Note: High security sites like Google.com still won't load in iframe
+                // But general sites like Wikipedia or blogs will.
+                loadIframe(url);
+                return;
+            }
+
+            // 3. FULL SEARCH: Use Whoogle (Unblocked Google Results)
+            // We use a public Whoogle instance that allows framing
+            const searchUrl = `https://search.carrot.re/search?q=${encodeURIComponent(query)}`;
+            loadIframe(searchUrl);
         }
 
-        function showTime(location) {
+        function loadIframe(url) {
+            card.style.display = 'none';
+            viewport.src = url;
+            viewport.style.display = 'block';
+        }
+
+        function showSmartTime(location) {
             try {
-                // Map common city names to IANA timezones (Basic mapping)
-                const zones = {
-                    'tokyo': 'Asia/Tokyo', 'london': 'Europe/London', 'new york': 'America/New_York',
-                    'paris': 'Europe/Paris', 'dubai': 'Asia/Dubai', 'israel': 'Asia/Jerusalem',
-                    'india': 'Asia/Kolkata', 'australia': 'Australia/Sydney'
-                };
-
-                let timezone = zones[location] || null;
+                const timeStr = new Date().toLocaleTimeString('en-US', { 
+                    timeStyle: 'short', 
+                    // This uses your local time; for global time, an API is usually needed
+                });
                 
-                const options = {
-                    timeStyle: 'short',
-                    hour12: true,
-                    timeZone: timezone
-                };
-
-                const formatter = new Intl.DateTimeFormat('en-US', options);
-                const timeString = formatter.format(new Date());
-
-                cardContent.innerHTML = `
-                    <div class="location-name">Current time in ${location}</div>
-                    <div class="time-val">${timeString}</div>
-                    <div style="color:#34a853">Dihtex Smart Answer</div>
+                document.getElementById('card-content').innerHTML = `
+                    <div class="ans-header">Current local time</div>
+                    <div class="ans-main">${timeStr}</div>
+                    <div style="color:#34a853; font-weight:bold;">Dihtex Intelligence</div>
                 `;
                 card.style.display = 'block';
-                viewport.style.display = 'none';
-            } catch (e) {
-                // If city not found, just search it
-                viewport.src = "https://www.bing.com/search?q=time+in+" + encodeURIComponent(location);
-                viewport.style.display = 'block';
+            } catch(e) {
+                // If logic fails, just search it
+                executeSearch();
             }
         }
 
-        function hideCard() {
+        function goHome() {
             card.style.display = 'none';
+            viewport.src = 'about:blank';
+            urlInput.value = '';
         }
     </script>
 </body>
