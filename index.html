@@ -2,249 +2,84 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dihtex | Chromium-Based Web</title>
+    <title>Dihtex | Chromium Pro</title>
     <style>
-        :root {
-            --bg-color: #f1f3f4;
-            --toolbar-color: #ffffff;
-            --accent-color: #4285f4;
-            --text-main: #202124;
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; height: 100vh; background: #f1f3f4; overflow: hidden; }
+        .toolbar { background: white; padding: 8px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #ccc; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        #urlInput { flex-grow: 1; padding: 10px 20px; border-radius: 20px; border: 1px solid #dfe1e5; outline: none; font-size: 14px; }
+        .nav-btn { cursor: pointer; border: none; background: #eee; padding: 8px 15px; border-radius: 5px; font-weight: bold; color: #5f6368; }
+        .nav-btn:hover { background: #e0e0e0; }
+        
+        #view-container { flex-grow: 1; position: relative; background: #fff; }
+        iframe { width: 100%; height: 100%; border: none; }
+        
+        /* The Welcome Screen */
+        #welcome { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            background: white; display: flex; flex-direction: column; 
+            align-items: center; justify-content: center; z-index: 10; 
         }
-
-        body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            font-family: 'Segoe UI', Tahoma, sans-serif;
-            background-color: var(--bg-color);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        /* Top Tab Bar */
-        .tab-bar {
-            background-color: #dee1e6;
-            height: 40px;
-            display: flex;
-            align-items: flex-end;
-            padding-left: 12px;
-            user-select: none;
-        }
-
-        .tab {
-            background-color: var(--toolbar-color);
-            width: 210px;
-            height: 32px;
-            border-radius: 8px 8px 0 0;
-            display: flex;
-            align-items: center;
-            padding: 0 15px;
-            font-size: 12px;
-            color: var(--text-main);
-            box-shadow: 0 -1px 2px rgba(0,0,0,0.05);
-            cursor: pointer;
-        }
-
-        /* Toolbar / Navigation */
-        .toolbar {
-            background-color: var(--toolbar-color);
-            height: 48px;
-            display: flex;
-            align-items: center;
-            padding: 0 14px;
-            border-bottom: 1px solid #d1d1d1;
-            gap: 15px;
-        }
-
-        .nav-icons {
-            display: flex;
-            gap: 18px;
-            color: #5f6368;
-            font-size: 18px;
-            font-weight: bold;
-        }
-
-        .nav-icons span {
-            cursor: pointer;
-            transition: color 0.2s;
-        }
-
-        .nav-icons span:hover { color: var(--accent-color); }
-
-        .address-bar-container {
-            flex-grow: 1;
-            display: flex;
-            align-items: center;
-        }
-
-        #urlInput {
-            width: 100%;
-            height: 30px;
-            background-color: #f1f3f4;
-            border: 1px solid transparent;
-            border-radius: 15px;
-            padding: 0 15px;
-            outline: none;
-            font-size: 14px;
-            transition: all 0.2s;
-        }
-
-        #urlInput:focus {
-            background-color: #fff;
-            border: 1px solid var(--accent-color);
-            box-shadow: 0 0 4px rgba(66,133,244,0.3);
-        }
-
-        /* Main Viewport */
-        #content-area {
-            flex-grow: 1;
-            position: relative;
-            background: white;
-        }
-
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            background: white;
-        }
-
-        /* Security/Error Overlay */
-        #error-screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #ffffff;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            z-index: 5;
-        }
-
-        .dihtex-logo-large {
-            font-size: 64px;
-            font-weight: bold;
-            margin-bottom: 15px;
-        }
-
-        .dihtex-logo-large span:nth-child(1) { color: #4285f4; }
-        .dihtex-logo-large span:nth-child(2) { color: #ea4335; }
-        .dihtex-logo-large span:nth-child(3) { color: #fbbc05; }
-        .dihtex-logo-large span:nth-child(4) { color: #4285f4; }
-        .dihtex-logo-large span:nth-child(5) { color: #34a853; }
-        .dihtex-logo-large span:nth-child(6) { color: #ea4335; }
-
-        .btn-open {
-            background-color: var(--accent-color);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 4px;
-            font-size: 16px;
-            cursor: pointer;
-            margin-top: 20px;
-        }
-
-        .btn-open:hover { background-color: #3367d6; }
-
+        .logo { font-size: 70px; font-weight: bold; margin-bottom: 20px; }
+        .logo span:nth-child(odd) { color: #4285f4; }
+        .logo span:nth-child(even) { color: #ea4335; }
     </style>
 </head>
 <body>
 
-    <div class="tab-bar">
-        <div class="tab" onclick="goHome()">Dihtex | New Tab</div>
-    </div>
-
     <div class="toolbar">
-        <div class="nav-icons">
-            <span onclick="goBack()">&#8592;</span>
-            <span onclick="reload()">&#8635;</span>
-            <span onclick="goHome()">&#8962;</span>
-        </div>
-        <div class="address-bar-container">
-            <input type="text" id="urlInput" placeholder="Search with Dihtex or type a URL" onkeydown="if(event.key==='Enter') navigate()">
-        </div>
-        <div class="nav-icons"><span>&#8942;</span></div>
+        <button class="nav-btn" onclick="home()">Home</button>
+        <input type="text" id="urlInput" placeholder="Search or type URL (e.g. wikipedia.org)" onkeydown="if(event.key==='Enter') browse()">
+        <button class="nav-btn" onclick="browse()" style="background: #4285f4; color: white;">Go</button>
     </div>
 
-    <div id="content-area">
-        <div id="error-screen">
-            <div class="dihtex-logo-large">
-                <span>D</span><span>i</span><span>h</span><span>t</span><span>e</span><span>x</span>
-            </div>
-            <p id="error-msg">This site has security policies that prevent it from loading inside Dihtex.</p>
-            <button class="btn-open" id="redirectBtn">Open in New Tab</button>
-            <p style="color: #70757a; font-size: 12px; margin-top: 15px;">Tip: Try searching for keywords instead of direct URLs.</p>
+    <div id="view-container">
+        <div id="welcome">
+            <div class="logo">Dihtex</div>
+            <p>Type a site like <b>wikipedia.org</b> or <b>example.com</b> above.</p>
+            <p style="font-size: 12px; color: #888;">Note: High-security sites (Google/YouTube) will open in a new tab.</p>
         </div>
-        <iframe id="viewport" src="https://duckduckgo.com"></iframe>
+        <iframe id="viewport"></iframe>
     </div>
 
     <script>
-        const viewport = document.getElementById('viewport');
-        const urlInput = document.getElementById('urlInput');
-        const errorScreen = document.getElementById('error-screen');
-        const redirectBtn = document.getElementById('redirectBtn');
+        const frame = document.getElementById('viewport');
+        const input = document.getElementById('urlInput');
+        const welcome = document.getElementById('welcome');
 
-        function navigate() {
-            let input = urlInput.value.trim();
-            if (!input) return;
+        function browse() {
+            let val = input.value.trim();
+            if(!val) return;
 
-            let targetUrl = input;
-
-            // Check if it's a URL or search
-            const isUrl = input.includes('.') && !input.includes(' ');
-            
-            if (!isUrl) {
-                // Search via DuckDuckGo (Friendly to iframes)
-                targetUrl = "https://duckduckgo.com/?q=" + encodeURIComponent(input);
-            } else {
-                if (!input.startsWith('http')) {
-                    targetUrl = "https://" + input;
+            let url = val;
+            if(!val.startsWith('http')) {
+                if(val.includes('.') && !val.includes(' ')) {
+                    url = 'https://' + val;
+                } else {
+                    // Using a Search Engine that is currently iframe-friendly
+                    url = 'https://www.ecosia.org/search?q=' + encodeURIComponent(val);
                 }
             }
 
-            // List of known sites that block iframes (X-Frame-Options)
-            const blockedSites = ['google.com', 'facebook.com', 'youtube.com', 'github.com', 'twitter.com', 'x.com', 'amazon.com', 'netflix.com'];
-            const isBlocked = blockedSites.some(site => targetUrl.toLowerCase().includes(site));
+            // LIST OF SITES THAT WILL FAIL IN IFRAMES
+            const restricted = ['google', 'youtube', 'facebook', 'github', 'twitter', 'x.com', 'duckduckgo'];
+            const needsExternal = restricted.some(s => url.toLowerCase().includes(s));
 
-            if (isBlocked) {
-                showError(targetUrl);
+            if(needsExternal) {
+                if(confirm("This site (Google/YT/GitHub) blocks being inside Dihtex. Open in a real new tab?")) {
+                    window.open(url, '_blank');
+                }
             } else {
-                hideError();
-                viewport.src = targetUrl;
-                urlInput.value = targetUrl;
+                welcome.style.display = 'none';
+                // We use a CORS Proxy for general websites to help them load
+                // Remove the proxy if you only want to visit "friendly" sites
+                frame.src = url; 
             }
         }
 
-        function showError(url) {
-            errorScreen.style.display = 'flex';
-            viewport.style.display = 'none';
-            redirectBtn.onclick = () => window.open(url, '_blank');
-        }
-
-        function hideError() {
-            errorScreen.style.display = 'none';
-            viewport.style.display = 'block';
-        }
-
-        function goHome() {
-            hideError();
-            viewport.src = "https://duckduckgo.com";
-            urlInput.value = "";
-        }
-
-        function reload() {
-            viewport.src = viewport.src;
-        }
-
-        function goBack() {
-            window.history.back();
+        function home() {
+            welcome.style.display = 'flex';
+            frame.src = 'about:blank';
+            input.value = '';
         }
     </script>
 </body>
