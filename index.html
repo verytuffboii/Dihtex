@@ -5,18 +5,11 @@
     <title>Dihtex - The Unlocked Browser</title>
     <style>
         body { margin: 0; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; height: 100vh; background: #f1f3f4; overflow: hidden; }
-        
-        /* Chromium Style UI */
         .toolbar { background: white; padding: 10px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #ccc; z-index: 100; }
-        .nav-btn { cursor: pointer; border: none; background: #eee; padding: 8px 12px; border-radius: 5px; font-weight: bold; }
+        .nav-btn { cursor: pointer; border: none; background: #eee; padding: 8px 12px; border-radius: 5px; font-weight: bold; font-size: 16px; }
         #urlInput { flex-grow: 1; padding: 10px 20px; border-radius: 20px; border: 1px solid #dfe1e5; outline: none; font-size: 14px; }
-        
         #view-container { flex-grow: 1; background: white; position: relative; }
-        
-        /* Webview must be styled to fill the container */
         webview { width: 100%; height: 100%; background: white; }
-
-        /* Welcome Overlay */
         #home-screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: white; display: flex; flex-direction: column;
@@ -33,17 +26,16 @@
     <div class="toolbar">
         <button class="nav-btn" onclick="goHome()">🏠</button>
         <button class="nav-btn" onclick="back()">←</button>
-        <input type="text" id="urlInput" placeholder="Search or type URL (e.g. youtube.com)" onkeydown="if(event.key==='Enter') doSearch()">
+        <input type="text" id="urlInput" placeholder="Search Google or type URL (e.g., youtube.com)" onkeydown="if(event.key==='Enter') doSearch()">
         <button class="nav-btn" style="background: #4285f4; color: white; border-radius: 20px;" onclick="doSearch()">Search</button>
     </div>
 
     <div id="view-container">
         <div id="home-screen">
             <div class="logo"><span>D</span><span>i</span><span>h</span><span>t</span><span>e</span><span>x</span></div>
-            <p style="color: #70757a;">Unblocked. No new tabs. Just Dihtex.</p>
+            <p style="color: #70757a;">Unblocked. High-Def. No Limits.</p>
         </div>
-
-        <webview id="viewport" src="about:blank"></webview>
+        <webview id="viewport" src="about:blank" nodeintegration allowpopups></webview>
     </div>
 
     <script>
@@ -51,30 +43,24 @@
         const home = document.getElementById('home-screen');
         const addrBar = document.getElementById('urlInput');
 
+        // Force the webview to use a modern browser identity
+        const ua = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36";
+
         function doSearch() {
             let val = addrBar.value.trim();
             if(!val) return;
-
             home.style.display = 'none';
-            
             let targetUrl = "";
             if (val.includes('.') && !val.includes(' ')) {
                 targetUrl = val.startsWith('http') ? val : 'https://' + val;
             } else {
-                // Using standard Google search because the Electron main.js will now unblock it
                 targetUrl = "https://www.google.com/search?q=" + encodeURIComponent(val);
             }
-            
-            // Webview uses .loadURL() or .src
+            view.setUserAgent(ua);
             view.src = targetUrl;
         }
 
-        function back() {
-            if (view.canGoBack()) {
-                view.goBack();
-            }
-        }
-
+        function back() { if (view.canGoBack()) view.goBack(); }
         function goHome() {
             home.style.display = 'flex';
             view.src = 'about:blank';
