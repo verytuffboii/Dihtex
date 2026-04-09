@@ -59,7 +59,7 @@
             font-size: 13px;
         }
 
-        /* Centered Home Screen */
+        /* Home Screen */
         #home-screen { 
             flex-grow: 1; 
             display: flex; 
@@ -80,7 +80,7 @@
             letter-spacing: -2px;
         }
 
-        .tagline { color: #64748b; font-size: 12px; letter-spacing: 4px; margin-bottom: 45px; text-transform: uppercase; }
+        .tagline { color: #64748b; font-size: 11px; letter-spacing: 5px; margin-bottom: 45px; text-transform: uppercase; }
 
         .search-container { width: 600px; position: relative; }
 
@@ -109,7 +109,6 @@
         .s-item:hover { transform: translateY(-8px); opacity: 1; color: var(--accent); }
         .s-icon { width: 65px; height: 65px; background: var(--glass); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 30px; border: 1px solid rgba(255,255,255,0.1); }
 
-        /* The Browser Window */
         webview { 
             width: 100%; 
             height: 100%; 
@@ -128,7 +127,7 @@
 
     <div id="home-screen">
         <div class="logo">Dihtex</div>
-        <div class="tagline">Ultra Secure • Unblocked</div>
+        <div class="tagline">Ultra Secure • One-Click Access</div>
         
         <div class="search-container">
             <input type="text" class="main-search" placeholder="Search anything..." onkeydown="if(event.key==='Enter') doSearch(this.value)">
@@ -139,9 +138,9 @@
                 <div class="s-icon">📺</div>
                 <span>YouTube</span>
             </div>
-            <div class="s-item" onclick="doSearch('accounts.google.com')">
+            <div class="s-item" onclick="openLogin()">
                 <div class="s-icon">🔑</div>
-                <span>Login</span>
+                <span>Safe Login</span>
             </div>
             <div class="s-item" onclick="doSearch('roblox.com')">
                 <div class="s-icon">🎮</div>
@@ -157,7 +156,7 @@
     <webview 
         id="viewport" 
         src="about:blank" 
-        partition="persist:dihtex_secure_v2" 
+        partition="persist:dihtex_final_v3" 
         useragent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
         allowpopups>
     </webview>
@@ -166,6 +165,7 @@
         const view = document.getElementById('viewport');
         const home = document.getElementById('home-screen');
         const addrBar = document.getElementById('addrBar');
+        const secureUA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36";
 
         function doSearch(val) {
             if(!val) return;
@@ -179,11 +179,19 @@
                 url = "https://www.google.com/search?q=" + encodeURIComponent(val);
             }
             
-            // Re-apply Secure User Agent right before loading
-            const secureUA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36";
             view.setUserAgent(secureUA);
             view.src = url;
             addrBar.value = url;
+        }
+
+        function openLogin() {
+            home.style.display = 'none';
+            view.style.display = 'flex';
+            // Specific Login URL that is harder for Google to flag
+            const loginUrl = "https://accounts.google.com/ServiceLogin?hl=en&passive=true&continue=https://www.google.com/";
+            view.setUserAgent(secureUA);
+            view.src = loginUrl;
+            addrBar.value = "Google Secure Login";
         }
 
         function goHome() {
@@ -195,7 +203,6 @@
 
         function back() { if (view.canGoBack()) view.goBack(); }
 
-        // Automatically update the address bar when you click links
         view.addEventListener('did-finish-load', () => {
             const currentURL = view.getURL();
             if (currentURL !== "about:blank") {
