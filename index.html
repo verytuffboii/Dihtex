@@ -2,67 +2,206 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Dihtex Pro</title>
+    <title>Dihtex Pro | Unblocked</title>
     <style>
-        :root { --bg: #0b0e14; --accent: #38bdf8; --glass: rgba(255, 255, 255, 0.05); }
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        :root { 
+            --bg: #0b0e14; 
+            --accent: #38bdf8; 
+            --glass: rgba(255, 255, 255, 0.05); 
+            --text: #ffffff;
+        }
         
-        .toolbar { background: var(--glass); backdrop-filter: blur(10px); padding: 10px 20px; display: flex; align-items: center; gap: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        #addrBar { flex-grow: 1; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); padding: 8px 15px; border-radius: 10px; color: white; outline: none; }
+        body { 
+            margin: 0; 
+            font-family: 'Segoe UI', Roboto, sans-serif; 
+            background: var(--bg); 
+            color: var(--text); 
+            height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            overflow: hidden; 
+        }
+        
+        /* Glass Toolbar */
+        .toolbar { 
+            background: var(--glass); 
+            backdrop-filter: blur(15px); 
+            -webkit-backdrop-filter: blur(15px);
+            padding: 10px 25px; 
+            display: flex; 
+            align-items: center; 
+            gap: 15px; 
+            border-bottom: 1px solid rgba(255,255,255,0.1); 
+            z-index: 100;
+        }
 
-        #home-screen { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle at center, #1e293b 0%, #0b0e14 100%); }
-        .logo { font-size: 100px; font-weight: 900; background: linear-gradient(to bottom right, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 20px rgba(56, 189, 248, 0.4)); margin-bottom: 10px; }
-        .tagline { color: #94a3b8; margin-bottom: 40px; font-size: 14px; letter-spacing: 2px; }
+        .nav-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 8px;
+            transition: 0.2s;
+        }
 
-        .search-wrap { width: 550px; position: relative; }
-        .main-search { width: 100%; padding: 18px 30px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.2); background: var(--glass); color: white; font-size: 18px; outline: none; transition: 0.3s; }
-        .main-search:focus { border-color: var(--accent); box-shadow: 0 0 25px rgba(56, 189, 248, 0.3); background: rgba(255,255,255,0.1); }
+        .nav-btn:hover { background: rgba(255,255,255,0.1); color: var(--accent); }
 
-        .shortcuts { display: flex; gap: 30px; margin-top: 50px; }
-        .s-item { cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 10px; transition: 0.2s; opacity: 0.8; }
-        .s-item:hover { transform: translateY(-5px); opacity: 1; }
-        .s-icon { width: 60px; height: 60px; background: var(--glass); border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 28px; border: 1px solid rgba(255,255,255,0.1); }
+        #addrBar { 
+            flex-grow: 1; 
+            background: rgba(0,0,0,0.4); 
+            border: 1px solid rgba(255,255,255,0.1); 
+            padding: 8px 15px; 
+            border-radius: 10px; 
+            color: white; 
+            outline: none; 
+            font-size: 13px;
+        }
 
-        webview { width: 100%; height: 100%; display: none; background: white; }
+        /* Centered Home Screen */
+        #home-screen { 
+            flex-grow: 1; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            background: radial-gradient(circle at center, #1e293b 0%, #0b0e14 100%); 
+        }
+
+        .logo { 
+            font-size: 110px; 
+            font-weight: 900; 
+            background: linear-gradient(45deg, #38bdf8, #818cf8); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+            filter: drop-shadow(0 0 25px rgba(56, 189, 248, 0.4)); 
+            margin-bottom: 5px;
+            letter-spacing: -2px;
+        }
+
+        .tagline { color: #64748b; font-size: 12px; letter-spacing: 4px; margin-bottom: 45px; text-transform: uppercase; }
+
+        .search-container { width: 600px; position: relative; }
+
+        .main-search { 
+            width: 100%; 
+            padding: 20px 35px; 
+            border-radius: 50px; 
+            border: 1px solid rgba(255,255,255,0.15); 
+            background: var(--glass); 
+            color: white; 
+            font-size: 18px; 
+            outline: none; 
+            transition: 0.3s;
+            backdrop-filter: blur(5px);
+        }
+
+        .main-search:focus { 
+            border-color: var(--accent); 
+            box-shadow: 0 0 30px rgba(56, 189, 248, 0.3); 
+            background: rgba(255,255,255,0.08); 
+        }
+
+        /* Shortcuts */
+        .shortcuts { display: flex; gap: 35px; margin-top: 55px; }
+        .s-item { cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 12px; transition: 0.3s; opacity: 0.7; }
+        .s-item:hover { transform: translateY(-8px); opacity: 1; color: var(--accent); }
+        .s-icon { width: 65px; height: 65px; background: var(--glass); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 30px; border: 1px solid rgba(255,255,255,0.1); }
+
+        /* The Browser Window */
+        webview { 
+            width: 100%; 
+            height: 100%; 
+            display: none; 
+            background: white; 
+        }
     </style>
 </head>
 <body>
+
     <div class="toolbar">
-        <button onclick="goHome()" style="background:none; border:none; color:white; cursor:pointer; font-size:20px;">🏠</button>
-        <input type="text" id="addrBar" placeholder="Search or type URL" onkeydown="if(event.key==='Enter') doSearch(this.value)">
+        <button class="nav-btn" onclick="goHome()">🏠</button>
+        <button class="nav-btn" onclick="back()">←</button>
+        <input type="text" id="addrBar" placeholder="Search Google or enter a website..." onkeydown="if(event.key==='Enter') doSearch(this.value)">
     </div>
 
     <div id="home-screen">
         <div class="logo">Dihtex</div>
-        <div class="tagline">SMART SEARCH UNBLOCKED</div>
-        <div class="search-wrap">
-            <input type="text" class="main-search" placeholder="Search Google..." onkeydown="if(event.key==='Enter') doSearch(this.value)">
+        <div class="tagline">Ultra Secure • Unblocked</div>
+        
+        <div class="search-container">
+            <input type="text" class="main-search" placeholder="Search anything..." onkeydown="if(event.key==='Enter') doSearch(this.value)">
         </div>
+
         <div class="shortcuts">
-            <div class="s-item" onclick="doSearch('youtube.com')"><div class="s-icon">📺</div><span>YouTube</span></div>
-            <div class="s-item" onclick="doSearch('roblox.com')"><div class="s-icon">🎮</div><span>Roblox</span></div>
-            <div class="s-item" onclick="doSearch('discord.com')"><div class="s-icon">💬</div><span>Discord</span></div>
+            <div class="s-item" onclick="doSearch('youtube.com')">
+                <div class="s-icon">📺</div>
+                <span>YouTube</span>
+            </div>
+            <div class="s-item" onclick="doSearch('accounts.google.com')">
+                <div class="s-icon">🔑</div>
+                <span>Login</span>
+            </div>
+            <div class="s-item" onclick="doSearch('roblox.com')">
+                <div class="s-icon">🎮</div>
+                <span>Roblox</span>
+            </div>
+            <div class="s-item" onclick="doSearch('discord.com')">
+                <div class="s-icon">💬</div>
+                <span>Discord</span>
+            </div>
         </div>
     </div>
 
-    <webview id="viewport" src="about:blank" partition="persist:dihtex_profile" allowpopups></webview>
+    <webview 
+        id="viewport" 
+        src="about:blank" 
+        partition="persist:dihtex_secure_v2" 
+        useragent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
+        allowpopups>
+    </webview>
 
     <script>
         const view = document.getElementById('viewport');
         const home = document.getElementById('home-screen');
-        const bar = document.getElementById('addrBar');
+        const addrBar = document.getElementById('addrBar');
 
         function doSearch(val) {
             if(!val) return;
             home.style.display = 'none';
             view.style.display = 'flex';
-            let url = (val.includes('.') && !val.includes(' ')) ? (val.startsWith('http') ? val : 'https://' + val) : "https://www.google.com/search?q=" + encodeURIComponent(val);
-            view.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36");
+            
+            let url = "";
+            if (val.includes('.') && !val.includes(' ')) {
+                url = val.startsWith('http') ? val : 'https://' + val;
+            } else {
+                url = "https://www.google.com/search?q=" + encodeURIComponent(val);
+            }
+            
+            // Re-apply Secure User Agent right before loading
+            const secureUA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36";
+            view.setUserAgent(secureUA);
             view.src = url;
-            bar.value = url;
+            addrBar.value = url;
         }
 
-        function goHome() { home.style.display = 'flex'; view.style.display = 'none'; view.src = 'about:blank'; bar.value = ''; }
+        function goHome() {
+            home.style.display = 'flex';
+            view.style.display = 'none';
+            view.src = 'about:blank';
+            addrBar.value = '';
+        }
+
+        function back() { if (view.canGoBack()) view.goBack(); }
+
+        // Automatically update the address bar when you click links
+        view.addEventListener('did-finish-load', () => {
+            const currentURL = view.getURL();
+            if (currentURL !== "about:blank") {
+                addrBar.value = currentURL;
+            }
+        });
     </script>
 </body>
 </html>
