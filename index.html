@@ -1,24 +1,31 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
-    <title>Dihtex - The Unlocked Browser</title>
+    <title>Dihtex Pro</title>
     <style>
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; height: 100vh; background: #f1f3f4; overflow: hidden; }
-        .toolbar { background: white; padding: 10px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #ccc; z-index: 100; }
-        .nav-btn { cursor: pointer; border: none; background: #eee; padding: 8px 12px; border-radius: 5px; font-weight: bold; font-size: 16px; }
-        #urlInput { flex-grow: 1; padding: 10px 20px; border-radius: 20px; border: 1px solid #dfe1e5; outline: none; font-size: 14px; }
-        #view-container { flex-grow: 1; background: white; position: relative; }
+        :root { --bg: #ffffff; --text: #202124; --toolbar: #f1f3f4; --accent: #4285f4; }
+        [data-theme="dark"] { --bg: #202124; --text: #ffffff; --toolbar: #2f3136; --accent: #8ab4f8; }
+        [data-theme="ocean"] { --bg: #001f3f; --text: #ffffff; --toolbar: #003366; --accent: #7fdbff; }
+
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; height: 100vh; background: var(--bg); color: var(--text); transition: 0.3s; }
+        .toolbar { background: var(--toolbar); padding: 8px 15px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(0,0,0,0.1); }
+        
+        #urlInput { flex-grow: 1; padding: 10px 20px; border-radius: 25px; border: 1px solid #555; background: var(--bg); color: var(--text); outline: none; }
+        
+        .nav-btn { cursor: pointer; border: none; background: transparent; color: var(--text); font-size: 18px; padding: 5px; border-radius: 50%; }
+        .nav-btn:hover { background: rgba(255,255,255,0.1); }
+
+        #view-container { flex-grow: 1; position: relative; }
         webview { width: 100%; height: 100%; background: white; }
+
+        .theme-select { padding: 5px; border-radius: 5px; background: var(--bg); color: var(--text); border: 1px solid #555; }
+        
         #home-screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: white; display: flex; flex-direction: column;
+            background: var(--bg); display: flex; flex-direction: column;
             align-items: center; justify-content: center; z-index: 5;
         }
-        .logo { font-size: 72px; font-weight: bold; margin-bottom: 20px; letter-spacing: -2px; }
-        .logo span:nth-child(1) { color: #4285f4; } .logo span:nth-child(2) { color: #ea4335; }
-        .logo span:nth-child(3) { color: #fbbc05; } .logo span:nth-child(4) { color: #4285f4; }
-        .logo span:nth-child(5) { color: #34a853; } .logo span:nth-child(6) { color: #ea4335; }
     </style>
 </head>
 <body>
@@ -26,16 +33,20 @@
     <div class="toolbar">
         <button class="nav-btn" onclick="goHome()">🏠</button>
         <button class="nav-btn" onclick="back()">←</button>
-        <input type="text" id="urlInput" placeholder="Search Google or type URL (e.g., youtube.com)" onkeydown="if(event.key==='Enter') doSearch()">
-        <button class="nav-btn" style="background: #4285f4; color: white; border-radius: 20px;" onclick="doSearch()">Search</button>
+        <input type="text" id="urlInput" placeholder="Enter URL or Search Google..." onkeydown="if(event.key==='Enter') doSearch()">
+        <select class="theme-select" onchange="setTheme(this.value)">
+            <option value="dark">🌙 Dark</option>
+            <option value="light">☀️ Light</option>
+            <option value="ocean">🌊 Ocean</option>
+        </select>
     </div>
 
     <div id="view-container">
         <div id="home-screen">
-            <div class="logo"><span>D</span><span>i</span><span>h</span><span>t</span><span>e</span><span>x</span></div>
-            <p style="color: #70757a;">Unblocked. High-Def. No Limits.</p>
+            <h1 style="font-size: 60px; margin: 0;">Dihtex</h1>
+            <p>Smart Search Unblocked</p>
         </div>
-        <webview id="viewport" src="about:blank" nodeintegration allowpopups></webview>
+        <webview id="viewport" src="about:blank" partition="persist:dihtex" nodeintegration allowpopups></webview>
     </div>
 
     <script>
@@ -43,29 +54,27 @@
         const home = document.getElementById('home-screen');
         const addrBar = document.getElementById('urlInput');
 
-        // Force the webview to use a modern browser identity
-        const ua = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36";
-
         function doSearch() {
             let val = addrBar.value.trim();
             if(!val) return;
             home.style.display = 'none';
-            let targetUrl = "";
+
+            let target = "";
+            // SMART SEARCH LOGIC: If it has a dot and no spaces, it's a URL
             if (val.includes('.') && !val.includes(' ')) {
-                targetUrl = val.startsWith('http') ? val : 'https://' + val;
+                target = val.startsWith('http') ? val : 'https://' + val;
             } else {
-                targetUrl = "https://www.google.com/search?q=" + encodeURIComponent(val);
+                // Otherwise, it's a Google search
+                target = "https://www.google.com/search?q=" + encodeURIComponent(val);
             }
-            view.setUserAgent(ua);
-            view.src = targetUrl;
+            
+            view.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36");
+            view.src = target;
         }
 
+        function setTheme(t) { document.documentElement.setAttribute('data-theme', t); }
         function back() { if (view.canGoBack()) view.goBack(); }
-        function goHome() {
-            home.style.display = 'flex';
-            view.src = 'about:blank';
-            addrBar.value = '';
-        }
+        function goHome() { home.style.display = 'flex'; view.src = 'about:blank'; addrBar.value = ''; }
     </script>
 </body>
 </html>
