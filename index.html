@@ -1,32 +1,149 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dihtex Pro</title>
     <style>
-        :root { --bg: #202124; --text: #ffffff; --toolbar: #2f3136; --accent: #8ab4f8; }
-        [data-theme="light"] { --bg: #ffffff; --text: #202124; --toolbar: #f1f3f4; --accent: #4285f4; }
-        
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; height: 100vh; background: var(--bg); color: var(--text); overflow: hidden; }
-        
-        /* Compact Toolbar */
-        .toolbar { background: var(--toolbar); padding: 5px 15px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(0,0,0,0.2); }
-        .nav-btn { cursor: pointer; border: none; background: transparent; color: var(--text); font-size: 18px; padding: 5px; }
-        #topAddrBar { flex-grow: 1; padding: 6px 15px; border-radius: 20px; border: 1px solid #555; background: var(--bg); color: var(--text); font-size: 12px; outline: none; }
-
-        #view-container { flex-grow: 1; position: relative; }
-        webview { width: 100%; height: 100%; background: white; display: none; }
-
-        /* Centered Search Home */
-        #home-screen {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg); display: flex; flex-direction: column;
-            align-items: center; justify-content: center; z-index: 5;
+        :root {
+            --bg: #0f172a; /* Deep midnight blue */
+            --glass: rgba(255, 255, 255, 0.05);
+            --accent: #38bdf8; /* Neon blue */
+            --text: #f8fafc;
         }
-        .logo { font-size: 80px; font-weight: bold; margin-bottom: 20px; }
-        .search-box { width: 500px; display: flex; flex-direction: column; gap: 20px; align-items: center; }
-        .main-input { width: 100%; padding: 15px 25px; border-radius: 30px; border: 1px solid #5f6368; background: transparent; color: white; font-size: 16px; outline: none; }
-        .main-input:focus { background: #303134; border-color: transparent; box-shadow: 0 1px 6px rgba(0,0,0,0.3); }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background: radial-gradient(circle at top right, #1e293b, #0f172a);
+            color: var(--text);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Modern Glass Toolbar */
+        .toolbar {
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            color: var(--text);
+            font-size: 20px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .nav-btn:hover { transform: scale(1.2); color: var(--accent); }
+
+        #addrBar {
+            flex-grow: 1;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 8px 18px;
+            border-radius: 12px;
+            color: white;
+            outline: none;
+            font-size: 13px;
+        }
+
+        /* Home Screen UI */
+        #home-screen {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            z-index: 10;
+        }
+
+        .logo {
+            font-size: 90px;
+            font-weight: 800;
+            background: linear-gradient(to right, #38bdf8, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 30px;
+            filter: drop-shadow(0 0 15px rgba(56, 189, 248, 0.3));
+        }
+
+        /* Glowing Search Bar */
+        .search-container {
+            width: 600px;
+            position: relative;
+        }
+
+        .main-search {
+            width: 100%;
+            padding: 18px 30px;
+            border-radius: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: var(--glass);
+            color: white;
+            font-size: 18px;
+            outline: none;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .main-search:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Shortcut Grid */
+        .shortcuts {
+            display: flex;
+            gap: 25px;
+            margin-top: 40px;
+        }
+
+        .shortcut-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .shortcut-icon {
+            width: 55px;
+            height: 55px;
+            background: var(--glass);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .shortcut-item:hover { transform: translateY(-5px); }
+        .shortcut-item:hover .shortcut-icon { background: rgba(255,255,255,0.15); border-color: var(--accent); }
+
+        /* The Browser Window */
+        webview {
+            width: 100%;
+            height: 100%;
+            display: none;
+            background: white;
+        }
     </style>
 </head>
 <body>
@@ -34,55 +151,75 @@
     <div class="toolbar">
         <button class="nav-btn" onclick="goHome()">🏠</button>
         <button class="nav-btn" onclick="back()">←</button>
-        <input type="text" id="topAddrBar" placeholder="Search or type URL" onkeydown="if(event.key==='Enter') doSearch(this.value)">
-        <select onchange="setTheme(this.value)" style="background:transparent; color:gray; border:none; font-size:10px;">
-            <option value="dark">Dark</option>
-            <option value="light">Light</option>
-        </select>
+        <input type="text" id="addrBar" placeholder="Search Google or enter URL" onkeydown="if(event.key==='Enter') doSearch(this.value)">
     </div>
 
-    <div id="view-container">
-        <div id="home-screen">
-            <div class="logo">Dihtex</div>
-            <div class="search-box">
-                <input type="text" class="main-input" placeholder="Search Google or type a URL..." onkeydown="if(event.key==='Enter') doSearch(this.value)">
-                <div style="color: #9aa0a6; font-size: 14px;">Unlocked Browser • Saves History & Logins</div>
+    <div id="home-screen">
+        <div class="logo">Dihtex</div>
+        
+        <div class="search-container">
+            <input type="text" class="main-search" placeholder="What's on your mind?" onkeydown="if(event.key==='Enter') doSearch(this.value)">
+        </div>
+
+        <div class="shortcuts">
+            <div class="shortcut-item" onclick="doSearch('youtube.com')">
+                <div class="shortcut-icon">📺</div>
+                <span>YouTube</span>
+            </div>
+            <div class="shortcut-item" onclick="doSearch('roblox.com')">
+                <div class="shortcut-icon">🎮</div>
+                <span>Roblox</span>
+            </div>
+            <div class="shortcut-item" onclick="doSearch('discord.com')">
+                <div class="shortcut-icon">💬</div>
+                <span>Discord</span>
+            </div>
+            <div class="shortcut-item" onclick="doSearch('github.com')">
+                <div class="shortcut-icon">🐙</div>
+                <span>GitHub</span>
             </div>
         </div>
-        <webview id="viewport" src="about:blank" partition="persist:dihtex" nodeintegration allowpopups></webview>
     </div>
+
+    <webview id="viewport" src="about:blank" partition="persist:dihtex_profile" allowpopups></webview>
 
     <script>
         const view = document.getElementById('viewport');
         const home = document.getElementById('home-screen');
-        const topBar = document.getElementById('topAddrBar');
+        const addrBar = document.getElementById('addrBar');
 
         function doSearch(val) {
             if(!val) return;
             home.style.display = 'none';
             view.style.display = 'flex';
             
-            let target = "";
+            let url = "";
             if (val.includes('.') && !val.includes(' ')) {
-                target = val.startsWith('http') ? val : 'https://' + val;
+                url = val.startsWith('http') ? val : 'https://' + val;
             } else {
-                target = "https://www.google.com/search?q=" + encodeURIComponent(val);
+                url = "https://www.google.com/search?q=" + encodeURIComponent(val);
             }
             
-            view.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36");
-            view.src = target;
-            topBar.value = target;
+            // Set the "Secure User Agent" for logins
+            const secureUA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36";
+            view.setUserAgent(secureUA);
+            view.src = url;
+            addrBar.value = url;
         }
 
         function goHome() {
             home.style.display = 'flex';
             view.style.display = 'none';
             view.src = 'about:blank';
-            topBar.value = '';
+            addrBar.value = '';
         }
 
         function back() { if (view.canGoBack()) view.goBack(); }
-        function setTheme(t) { document.documentElement.setAttribute('data-theme', t); }
+
+        // Update top bar when browsing
+        view.addEventListener('did-finish-load', () => {
+            addrBar.value = view.getURL();
+        });
     </script>
 </body>
 </html>
