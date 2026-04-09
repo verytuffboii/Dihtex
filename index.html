@@ -4,28 +4,29 @@
     <meta charset="UTF-8">
     <title>Dihtex Pro</title>
     <style>
-        :root { --bg: #ffffff; --text: #202124; --toolbar: #f1f3f4; --accent: #4285f4; }
-        [data-theme="dark"] { --bg: #202124; --text: #ffffff; --toolbar: #2f3136; --accent: #8ab4f8; }
-        [data-theme="ocean"] { --bg: #001f3f; --text: #ffffff; --toolbar: #003366; --accent: #7fdbff; }
-
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; height: 100vh; background: var(--bg); color: var(--text); transition: 0.3s; }
-        .toolbar { background: var(--toolbar); padding: 8px 15px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(0,0,0,0.1); }
+        :root { --bg: #202124; --text: #ffffff; --toolbar: #2f3136; --accent: #8ab4f8; }
+        [data-theme="light"] { --bg: #ffffff; --text: #202124; --toolbar: #f1f3f4; --accent: #4285f4; }
         
-        #urlInput { flex-grow: 1; padding: 10px 20px; border-radius: 25px; border: 1px solid #555; background: var(--bg); color: var(--text); outline: none; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; height: 100vh; background: var(--bg); color: var(--text); overflow: hidden; }
         
-        .nav-btn { cursor: pointer; border: none; background: transparent; color: var(--text); font-size: 18px; padding: 5px; border-radius: 50%; }
-        .nav-btn:hover { background: rgba(255,255,255,0.1); }
+        /* Compact Toolbar */
+        .toolbar { background: var(--toolbar); padding: 5px 15px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(0,0,0,0.2); }
+        .nav-btn { cursor: pointer; border: none; background: transparent; color: var(--text); font-size: 18px; padding: 5px; }
+        #topAddrBar { flex-grow: 1; padding: 6px 15px; border-radius: 20px; border: 1px solid #555; background: var(--bg); color: var(--text); font-size: 12px; outline: none; }
 
         #view-container { flex-grow: 1; position: relative; }
-        webview { width: 100%; height: 100%; background: white; }
+        webview { width: 100%; height: 100%; background: white; display: none; }
 
-        .theme-select { padding: 5px; border-radius: 5px; background: var(--bg); color: var(--text); border: 1px solid #555; }
-        
+        /* Centered Search Home */
         #home-screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg); display: flex; flex-direction: column;
             align-items: center; justify-content: center; z-index: 5;
         }
+        .logo { font-size: 80px; font-weight: bold; margin-bottom: 20px; }
+        .search-box { width: 500px; display: flex; flex-direction: column; gap: 20px; align-items: center; }
+        .main-input { width: 100%; padding: 15px 25px; border-radius: 30px; border: 1px solid #5f6368; background: transparent; color: white; font-size: 16px; outline: none; }
+        .main-input:focus { background: #303134; border-color: transparent; box-shadow: 0 1px 6px rgba(0,0,0,0.3); }
     </style>
 </head>
 <body>
@@ -33,18 +34,20 @@
     <div class="toolbar">
         <button class="nav-btn" onclick="goHome()">🏠</button>
         <button class="nav-btn" onclick="back()">←</button>
-        <input type="text" id="urlInput" placeholder="Enter URL or Search Google..." onkeydown="if(event.key==='Enter') doSearch()">
-        <select class="theme-select" onchange="setTheme(this.value)">
-            <option value="dark">🌙 Dark</option>
-            <option value="light">☀️ Light</option>
-            <option value="ocean">🌊 Ocean</option>
+        <input type="text" id="topAddrBar" placeholder="Search or type URL" onkeydown="if(event.key==='Enter') doSearch(this.value)">
+        <select onchange="setTheme(this.value)" style="background:transparent; color:gray; border:none; font-size:10px;">
+            <option value="dark">Dark</option>
+            <option value="light">Light</option>
         </select>
     </div>
 
     <div id="view-container">
         <div id="home-screen">
-            <h1 style="font-size: 60px; margin: 0;">Dihtex</h1>
-            <p>Smart Search Unblocked</p>
+            <div class="logo">Dihtex</div>
+            <div class="search-box">
+                <input type="text" class="main-input" placeholder="Search Google or type a URL..." onkeydown="if(event.key==='Enter') doSearch(this.value)">
+                <div style="color: #9aa0a6; font-size: 14px;">Unlocked Browser • Saves History & Logins</div>
+            </div>
         </div>
         <webview id="viewport" src="about:blank" partition="persist:dihtex" nodeintegration allowpopups></webview>
     </div>
@@ -52,29 +55,34 @@
     <script>
         const view = document.getElementById('viewport');
         const home = document.getElementById('home-screen');
-        const addrBar = document.getElementById('urlInput');
+        const topBar = document.getElementById('topAddrBar');
 
-        function doSearch() {
-            let val = addrBar.value.trim();
+        function doSearch(val) {
             if(!val) return;
             home.style.display = 'none';
-
+            view.style.display = 'flex';
+            
             let target = "";
-            // SMART SEARCH LOGIC: If it has a dot and no spaces, it's a URL
             if (val.includes('.') && !val.includes(' ')) {
                 target = val.startsWith('http') ? val : 'https://' + val;
             } else {
-                // Otherwise, it's a Google search
                 target = "https://www.google.com/search?q=" + encodeURIComponent(val);
             }
             
             view.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36");
             view.src = target;
+            topBar.value = target;
         }
 
-        function setTheme(t) { document.documentElement.setAttribute('data-theme', t); }
+        function goHome() {
+            home.style.display = 'flex';
+            view.style.display = 'none';
+            view.src = 'about:blank';
+            topBar.value = '';
+        }
+
         function back() { if (view.canGoBack()) view.goBack(); }
-        function goHome() { home.style.display = 'flex'; view.src = 'about:blank'; addrBar.value = ''; }
+        function setTheme(t) { document.documentElement.setAttribute('data-theme', t); }
     </script>
 </body>
 </html>
